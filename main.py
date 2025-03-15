@@ -2,6 +2,9 @@ import scrapy
 from scrapy.pipelines.files import FilesPipeline
 import datetime
 from w3lib.url import url_query_cleaner
+from pathlib import PurePosixPath
+from scrapy.utils.httpobj import urlparse_cached
+from scrapy.pipelines.files import FilesPipeline
 import time
 
 class MySpider(scrapy.Spider):
@@ -27,10 +30,11 @@ class RenameFilesPipeline(FilesPipeline):
     # create it only once - when Scrapy creates instance of RenameFilesPipeline
     pattern = datetime.datetime.now().strftime('images/%Y.%m.%d-%H.%M.%S/{}')
 
-    def file_path(self, request, response=None, info=None):
+    def file_path(self, request, response=None, info=None, *, item=None):
         '''Changing file name - adding folder name with date and time'''
 
         name = request.url.split('/')[-1]
+        # print(request.url)
         filename = self.pattern.format(name)
         print('filename:', filename)
 
@@ -42,9 +46,9 @@ from scrapy.crawler import CrawlerProcess
 
 c = CrawlerProcess({
     # used standard FilesPipeline (download to FILES_STORE/full)
-    'ITEM_PIPELINES': {'scrapy.pipelines.files.FilesPipeline': 1},
+    # 'ITEM_PIPELINES': {'scrapy.pipelines.files.FilesPipeline': 1},
 
-    # 'ITEM_PIPELINES': {'__main__.RenameFilesPipeline': 1},
+    'ITEM_PIPELINES': {'__main__.RenameFilesPipeline': 1},
 
     # this folder has to exist before downloading
     'FILES_STORE': './img3',
